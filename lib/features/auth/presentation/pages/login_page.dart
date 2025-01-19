@@ -1,9 +1,74 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/wave_clipper.dart';
+import '../../data/auth_service.dart';
+import '../../domain/auth_model.dart';
 
-class LoginPage extends StatelessWidget {
+class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
+
+  @override
+  State<LoginPage> createState() => _LoginPageState();
+}
+
+class _LoginPageState extends State<LoginPage> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  Future<void> _login() async {
+    final String username = _usernameController.text.trim();
+    final String password = _passwordController.text;
+
+    if (username.isEmpty || password.isEmpty) {
+      _showErrorDialog("Please enter your username and password.");
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      // Llamar al servicio de autenticación
+      final response = await AuthService.login(username, password);
+      final authData = AuthModel.fromJson(response);
+
+      // Guardar el token y otros datos en SharedPreferences
+      final SharedPreferences prefs = await SharedPreferences.getInstance();
+      await prefs.setString('authToken', authData.token);
+      await prefs.setString('role', authData.role);
+      await prefs.setString('username', authData.username);
+
+      // Redirigir a la pantalla principal
+      Navigator.pushReplacementNamed(context, '/home');
+    } catch (e) {
+      _showErrorDialog(e.toString());
+    } finally {
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Error"),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop();
+            },
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -12,7 +77,6 @@ class LoginPage extends StatelessWidget {
       body: SafeArea(
         child: Column(
           children: [
-            // Sección superior con gradiente y ola
             Stack(
               children: [
                 ClipPath(
@@ -37,7 +101,6 @@ class LoginPage extends StatelessWidget {
                   right: 0,
                   child: Column(
                     children: [
-                      // Imagen con bordes redondeados
                       Container(
                         height: 220,
                         width: 220,
@@ -45,13 +108,13 @@ class LoginPage extends StatelessWidget {
                           shape: BoxShape.circle,
                           border: Border.all(
                             color: Colors.white.withOpacity(0.8),
-                            width: 4.0, // Grosor del borde
+                            width: 4.0,
                           ),
                           boxShadow: [
                             BoxShadow(
                               color: Colors.black.withOpacity(0.1),
                               blurRadius: 10,
-                              offset: Offset(0, 5),
+                              offset: const Offset(0, 5),
                             ),
                           ],
                         ),
@@ -76,26 +139,17 @@ class LoginPage extends StatelessWidget {
                 ),
               ],
             ),
-            // Sección inferior con contenido principal
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.symmetric(horizontal: 24.0),
                 child: Column(
                   children: [
-                    const Text(
-                      'SIGN UP',
-                      style: TextStyle(
-                        fontSize: 24.0,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primaryBlue,
-                      ),
-                    ),
                     const SizedBox(height: 20),
-                    // Campo de texto: Email
                     TextField(
+                      controller: _usernameController,
                       decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.email, color: AppColors.primaryBlue),
-                        labelText: 'Email',
+                        prefixIcon: Icon(Icons.person, color: AppColors.primaryBlue),
+                        labelText: 'Username',
                         labelStyle: TextStyle(color: AppColors.primaryBlue),
                         filled: true,
                         fillColor: AppColors.primaryBlue.withOpacity(0.1),
@@ -106,8 +160,8 @@ class LoginPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // Campo de texto: Contraseña
                     TextField(
+                      controller: _passwordController,
                       obscureText: true,
                       decoration: InputDecoration(
                         prefixIcon: Icon(Icons.lock, color: AppColors.primaryBlue),
@@ -122,11 +176,8 @@ class LoginPage extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: 30),
-                    // Botón de iniciar sesión
                     ElevatedButton(
-                      onPressed: () {
-                        // Implementar lógica de registro
-                      },
+                      onPressed: _isLoading ? null : _login,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppColors.primaryBlue,
                         foregroundColor: Colors.white,
@@ -136,8 +187,10 @@ class LoginPage extends StatelessWidget {
                           borderRadius: BorderRadius.circular(12.0),
                         ),
                       ),
-                      child: const Text(
-                        'SIGN UP',
+                      child: _isLoading
+                          ? const CircularProgressIndicator(color: Colors.white)
+                          : const Text(
+                        'Log in',
                         style: TextStyle(
                           fontSize: 16.0,
                           fontWeight: FontWeight.bold,
@@ -167,6 +220,7 @@ class LoginPage extends StatelessWidget {
                         ),
                       ],
                     ),
+                    // Iconos de redes
                     const SizedBox(height: 30),
                     // Iconos de redes sociales
                     Row(
@@ -186,6 +240,7 @@ class LoginPage extends StatelessWidget {
                         ),
                       ],
                     ),
+
                   ],
                 ),
               ),
