@@ -82,21 +82,14 @@ class _LoginPageState extends State<LoginPage> {
                 ClipPath(
                   clipper: WaveClipper(),
                   child: Container(
-                    height: 300,
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [
-                          AppColors.primaryBlue,
-                          AppColors.primaryBlue.withOpacity(0.8),
-                        ],
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                      ),
+                    height: 400,
+                    decoration: const BoxDecoration(
+                      gradient: AppColors.customGradient, // Nuevo gradiente
                     ),
                   ),
                 ),
                 Positioned(
-                  top: 50,
+                  top: 110,
                   left: 0,
                   right: 0,
                   child: Column(
@@ -125,34 +118,38 @@ class _LoginPageState extends State<LoginPage> {
                           ),
                         ),
                       ),
-                      const SizedBox(height: 20),
+                      const SizedBox(height: 24),
                       const Text(
                         'SIGN UP',
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: const Color(0xFF2B2E40),
                         ),
                       ),
+
                     ],
                   ),
                 ),
               ],
             ),
             Expanded(
+
               child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0),
+
+                padding: const EdgeInsets.symmetric(horizontal: 30.0),
                 child: Column(
                   children: [
-                    const SizedBox(height: 20),
+
+                    const SizedBox(height:10),
                     TextField(
                       controller: _usernameController,
                       decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.person, color: AppColors.primaryBlue),
+                        prefixIcon: const Icon(Icons.person, color: Color(0xFF2E1C9C)), // Color oscuro del gradiente
                         labelText: 'Username',
-                        labelStyle: TextStyle(color: AppColors.primaryBlue),
+                        labelStyle: const TextStyle(color: Color(0xFF2E1C9C)), // Color del gradiente
                         filled: true,
-                        fillColor: AppColors.primaryBlue.withOpacity(0.1),
+                        fillColor: const Color(0xFF2E1C9C).withOpacity(0.1), // Fondo con opacidad
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.0),
                           borderSide: BorderSide.none,
@@ -164,11 +161,11 @@ class _LoginPageState extends State<LoginPage> {
                       controller: _passwordController,
                       obscureText: true,
                       decoration: InputDecoration(
-                        prefixIcon: Icon(Icons.lock, color: AppColors.primaryBlue),
+                        prefixIcon: const Icon(Icons.lock, color: Color(0xFF2E1C9C)), // Color oscuro del gradiente
                         labelText: 'Password',
-                        labelStyle: TextStyle(color: AppColors.primaryBlue),
+                        labelStyle: const TextStyle(color: Color(0xFF2E1C9C)), // Color del gradiente
                         filled: true,
-                        fillColor: AppColors.primaryBlue.withOpacity(0.1),
+                        fillColor: const Color(0xFF2E1C9C).withOpacity(0.1), // Fondo con opacidad
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.0),
                           borderSide: BorderSide.none,
@@ -179,7 +176,7 @@ class _LoginPageState extends State<LoginPage> {
                     ElevatedButton(
                       onPressed: _isLoading ? null : _login,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppColors.primaryBlue,
+                        backgroundColor: const Color(0xFF2E1C9C), // Color del gradiente
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
                         minimumSize: const Size(double.infinity, 50),
@@ -198,13 +195,12 @@ class _LoginPageState extends State<LoginPage> {
                       ),
                     ),
                     const SizedBox(height: 20),
-                    // Enlace de "Ya tienes una cuenta"
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
                           "Already have an Account? ",
-                          style: TextStyle(color: AppColors.primaryBlue.withOpacity(0.7)),
+                          style: TextStyle(color: const Color(0xFF2E1C9C).withOpacity(0.7)),
                         ),
                         GestureDetector(
                           onTap: () {
@@ -213,34 +209,31 @@ class _LoginPageState extends State<LoginPage> {
                           child: Text(
                             'Sign In',
                             style: TextStyle(
-                              color: AppColors.primaryBlue,
+                              color: const Color(0xFF2E1C9C),
                               fontWeight: FontWeight.bold,
                             ),
                           ),
                         ),
                       ],
                     ),
-                    // Iconos de redes
                     const SizedBox(height: 30),
-                    // Iconos de redes sociales
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         IconButton(
                           onPressed: () {},
-                          icon: Icon(Icons.facebook, color: Colors.blue),
+                          icon: const Icon(Icons.facebook, color: Colors.blue),
                         ),
                         IconButton(
                           onPressed: () {},
-                          icon: Icon(Icons.g_mobiledata_sharp, color: Colors.red, size: 34),
+                          icon: const Icon(Icons.g_mobiledata_sharp, color: Colors.red, size: 34),
                         ),
                         IconButton(
                           onPressed: () {},
-                          icon: Icon(Icons.apple, color: Colors.black),
+                          icon: const Icon(Icons.apple, color: Colors.black),
                         ),
                       ],
                     ),
-
                   ],
                 ),
               ),
