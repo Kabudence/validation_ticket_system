@@ -8,12 +8,12 @@ class ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity, // Ocupa todo el ancho de la pantalla
-      padding: const EdgeInsets.only(top: 32.0, bottom: 16.0),
+      padding: const EdgeInsets.only(top: 20.0, bottom: 140.0),
       decoration: BoxDecoration(
-        color: AppColors.primaryBlue, // Fondo principal del contenedor
+        gradient: AppColors.customGradient, // Gradiente definido en AppColors
         borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(0.0),
-          bottomRight: Radius.circular(0.0),
+          bottomLeft: Radius.circular(15.0),
+          bottomRight: Radius.circular(15.0),
         ),
       ),
       child: Column(
@@ -25,17 +25,18 @@ class ProfileHeader extends StatelessWidget {
             backgroundImage: const AssetImage('assets/images/user_profile.jpg'),
             backgroundColor: Colors.white, // Fondo blanco alrededor de la imagen
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 16.0),
           // Nombre del usuario
           const Text(
             "Jenny Wilson",
             style: TextStyle(
+
               fontSize: 22,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
+
           ),
-          const SizedBox(height: 8),
           // Grado del usuario
           const Text(
             "9th Grade",
@@ -44,6 +45,8 @@ class ProfileHeader extends StatelessWidget {
               color: Colors.white70,
             ),
           ),
+          const SizedBox(height: 20),
+
         ],
       ),
     );
