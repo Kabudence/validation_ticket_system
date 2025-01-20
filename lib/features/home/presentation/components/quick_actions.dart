@@ -7,14 +7,7 @@ class QuickActions extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
-      decoration: BoxDecoration(
-        color: AppColors.primaryBlue, // Fondo principal del contenedor
-        borderRadius: const BorderRadius.only(
-          bottomLeft: Radius.circular(20.0), // Esquina inferior izquierda redondeada
-          bottomRight: Radius.circular(20.0), // Esquina inferior derecha redondeada
-        ),
-      ),
+      padding: const EdgeInsets.only(top: 10.0, bottom: 60.0),
       child: SingleChildScrollView(
         scrollDirection: Axis.horizontal, // Habilitar desplazamiento horizontal
         child: Row(
@@ -23,22 +16,22 @@ class QuickActions extends StatelessWidget {
             _QuickActionItem(
               icon: Icons.rocket_launch,
               label: "Academic success",
-              color: Colors.teal,
+              color: const Color(0xFF7D54E0), // Púrpura vibrante (armonizado)
             ),
             _QuickActionItem(
               icon: Icons.menu_book,
               label: "Homework",
-              color: Colors.purple,
+              color: const Color(0xFF7056D2), // Púrpura más claro
             ),
             _QuickActionItem(
               icon: Icons.warning,
               label: "Notifications",
-              color: Colors.orange,
+              color: const Color(0xFFF4A261), // Naranja más suave
             ),
             _QuickActionItem(
               icon: Icons.person,
               label: "Profile",
-              color: Colors.blue,
+              color: const Color(0xFF2E1C9C), // Azul oscuro
             ),
             const SizedBox(width: 12.0), // Espaciado final
           ],
@@ -64,7 +57,7 @@ class _QuickActionItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8.0),
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 16.0), // Más espacio superior e inferior
       decoration: BoxDecoration(
         color: Colors.white, // Fondo blanco para cada acción
         borderRadius: BorderRadius.circular(20.0), // Bordes redondeados
@@ -78,18 +71,22 @@ class _QuickActionItem extends StatelessWidget {
       ),
       child: Row(
         children: [
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: color.withOpacity(0.2),
-            child: Icon(icon, color: color, size: 20),
+          Container(
+            width: 38, // Ancho del contenedor
+            height: 38, // Altura del contenedor
+            decoration: BoxDecoration(
+              color: color.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(10.0), // Bordes medio redondeados
+            ),
+            child: Icon(icon, color: Colors.white, size: 24),
           ),
           const SizedBox(width: 8),
           Text(
             label,
             style: TextStyle(
-              fontSize: 14,
-              fontWeight: FontWeight.w600,
-              color: AppColors.primaryBlue,
+              fontSize: 16,
+              fontWeight: FontWeight.bold, // Texto en negrita
+              color: AppColors.secondBlue.withAlpha(200), // Color secundario con opacidad
             ),
           ),
         ],

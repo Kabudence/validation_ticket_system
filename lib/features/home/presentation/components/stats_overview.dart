@@ -7,10 +7,10 @@ class StatsOverview extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16.0, horizontal: 12.0),
-      margin: const EdgeInsets.symmetric(horizontal: 16.0),
+      padding: const EdgeInsets.symmetric(vertical: 13.0, horizontal: 9.0),
+      margin: const EdgeInsets.symmetric(horizontal: 1.0),
       decoration: BoxDecoration(
-        color: AppColors.primaryBlue, // Fondo general del contenedor
+        gradient: AppColors.buttomGradient, // Fondo general del contenedor
         borderRadius: BorderRadius.circular(30.0), // Bordes circulares grandes
         boxShadow: [
           BoxShadow(
@@ -37,7 +37,10 @@ class StatsOverview extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 8.0),
         margin: const EdgeInsets.symmetric(horizontal: 8.0),
         decoration: BoxDecoration(
-          color: AppColors.primaryBlue.withOpacity(0.6), // Fondo más claro para cada estadística
+          color: Color.alphaBlend(
+            Colors.white.withOpacity(0.1), // Mezclo el fondo con un poco de blanco
+            AppColors.secondBlue.withOpacity(0.6),
+          ),
           borderRadius: BorderRadius.circular(20.0), // Bordes más pequeños para cada tarjeta
           boxShadow: [
             BoxShadow(

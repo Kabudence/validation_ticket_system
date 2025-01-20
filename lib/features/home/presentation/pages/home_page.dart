@@ -11,7 +11,7 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFDBE8FF), // Fondo azul claro
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -20,25 +20,28 @@ class HomePage extends StatelessWidget {
             Stack(
               clipBehavior: Clip.none, // Permite que los widgets se salgan del Stack
               children: [
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const ProfileHeader(), // Header del perfil
-                    Container(
-                      margin: const EdgeInsets.only(bottom: 30.0),
-                      child: const QuickActions(), // Acciones rápidas
-                    ),
-                  ],
+                Container(
+                  margin: const EdgeInsets.only(
+                    left: 10.0,
+                    right: 10.0,
+                  ),
+                  child: const ProfileHeader(),
                 ),
                 Positioned(
-                  top: 404, // Controla la superposición de StatsOverview
+                  top: 290, // Ajusta la posición vertical de QuickActions
+                  left: 10.0,
+                  right: 10.0,
+                  child: const QuickActions(), // Acciones rápidas como elemento flotante
+                ),
+                Positioned(
+                  top: 380, // Controla la superposición de StatsOverview
                   left: 16.0,
                   right: 16.0,
                   child: const StatsOverview(), // Contenedor de estadísticas
                 ),
               ],
             ),
-            const SizedBox(height: 105.0), // Espaciado entre StatsOverview y el siguiente bloque
+            const SizedBox(height: 47.0), // Espaciado entre StatsOverview y el siguiente bloque
             // Sección inferior con scrollable content
             Expanded(
               child: SingleChildScrollView(
@@ -47,7 +50,7 @@ class HomePage extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     const CalendarWidget(), // Calendario
-                    const SizedBox(height: 20.0),
+                    const SizedBox(height: 10.0),
                     const ScheduleCard(
                       subject: 'Biology',
                       teacher: 'Floyd Miles',
@@ -65,7 +68,7 @@ class HomePage extends StatelessWidget {
       bottomNavigationBar: Container(
         height: 70,
         decoration: BoxDecoration(
-          color: const Color(0xFF5567FF),
+          color: const Color(0xFF2B2E40), // Azul oscuro para la barra inferior
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20.0),
             topRight: Radius.circular(20.0),
@@ -77,6 +80,7 @@ class HomePage extends StatelessWidget {
             _buildNavItem(Icons.home, 'Home', true),
             _buildNavItem(Icons.dashboard, 'Dashboard', false),
             _buildNavItem(Icons.notifications, 'Notifications', false),
+            _buildNavItem(Icons.sticky_note_2, 'Boletas', false),
           ],
         ),
       ),

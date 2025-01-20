@@ -33,6 +33,9 @@ dependencies:
 
   http: ^1.2.2
   shared_preferences: ^2.3.5
+  intl: ^0.20.1
+  dio: ^5.7.0
+
 
 
   # The following adds the Cupertino Icons font to your application.
@@ -66,6 +69,7 @@ flutter:
     - assets/images/front_image.png
     - assets/images/font_3.png
     - assets/images/login_logo.png
+    - assets/images/img_fount.png
   #   - images/a_dot_ham.jpeg
 
   # An image asset can refer to one or more resolution-specific "variants", see
