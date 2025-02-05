@@ -77,10 +77,10 @@ class HomePage extends StatelessWidget {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
-            _buildNavItem(Icons.home, 'Home', true),
-            _buildNavItem(Icons.dashboard, 'Dashboard', false),
-            _buildNavItem(Icons.notifications, 'Notifications', false),
-            _buildNavItem(Icons.sticky_note_2, 'Boletas', false),
+            _buildNavItem(Icons.home, 'Home', true, context),
+            _buildNavItem(Icons.dashboard, 'Dashboard', false, context),
+            _buildNavItem(Icons.notifications, 'Notifications', false, context),
+            _buildNavItem(Icons.sticky_note_2, 'Boletas', false, context),
           ],
         ),
       ),
@@ -88,24 +88,32 @@ class HomePage extends StatelessWidget {
   }
 
   // Método para construir cada botón de navegación inferior
-  Widget _buildNavItem(IconData icon, String label, bool isSelected) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(
-          icon,
-          color: isSelected ? Colors.white : Colors.white70,
-          size: 28.0,
-        ),
-        const SizedBox(height: 4.0),
-        Text(
-          label,
-          style: TextStyle(
+  Widget _buildNavItem(IconData icon, String label, bool isSelected, BuildContext context) {
+    return GestureDetector(
+      onTap: () {
+        if (label == 'Boletas') {
+          Navigator.pushNamed(context, '/boletas'); // Navega a la ruta 'boletas'
+        }
+        // Puedes agregar más condiciones para otras rutas
+      },
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            icon,
             color: isSelected ? Colors.white : Colors.white70,
-            fontSize: 12.0,
+            size: 28.0,
           ),
-        ),
-      ],
+          const SizedBox(height: 4.0),
+          Text(
+            label,
+            style: TextStyle(
+              color: isSelected ? Colors.white : Colors.white70,
+              fontSize: 12.0,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
