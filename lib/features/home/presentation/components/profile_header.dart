@@ -21,14 +21,14 @@ class ProfileHeader extends StatelessWidget {
         children: [
           // Imagen del perfil
           CircleAvatar(
-            radius: 100,
-            backgroundImage: const AssetImage('assets/images/user_profile.jpg'),
+            radius: 80,
+            backgroundImage: const AssetImage('assets/images/login_logo.png'),
             backgroundColor: Colors.white, // Fondo blanco alrededor de la imagen
           ),
           const SizedBox(height: 16.0),
           // Nombre del usuario
           const Text(
-            "Jenny Wilson",
+            "Madelaine Bustamante",
             style: TextStyle(
 
               fontSize: 22,
@@ -39,7 +39,7 @@ class ProfileHeader extends StatelessWidget {
           ),
           // Grado del usuario
           const Text(
-            "9th Grade",
+            "Gerente general",
             style: TextStyle(
               fontSize: 16,
               color: Colors.white70,
