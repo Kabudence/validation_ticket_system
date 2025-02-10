@@ -1,8 +1,36 @@
 import 'package:flutter/material.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../data/bolestas_service.dart';
-class BoletasPage extends StatelessWidget {
+import 'completar_venta_page.dart';
+
+class BoletasPage extends StatefulWidget {
+  const BoletasPage({Key? key}) : super(key: key);
+
+  @override
+  _BoletasPageState createState() => _BoletasPageState();
+}
+
+class _BoletasPageState extends State<BoletasPage> {
   final BoletasService boletasService = BoletasService();
+
+  // Guardamos el future para reusarlo en el FutureBuilder
+  late Future<List<dynamic>> _futureBoletas;
+
+  @override
+  void initState() {
+    super.initState();
+    // Cargar la lista de boletas inicialmente
+    _loadBoletas();
+  }
+
+  // Método para cargar o recargar las boletas
+  void _loadBoletas() {
+    // Llama a tu endpoint /ventas/today-inprocess-peru con limit y offset
+    _futureBoletas = boletasService.getBoletasTodayInProcessPeru(
+      limit: 10,
+      offset: 0,
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -22,13 +50,14 @@ class BoletasPage extends StatelessWidget {
       extendBodyBehindAppBar: true, // Para que el AppBar quede sobre el gradiente
       body: Container(
         decoration: const BoxDecoration(
-          gradient: AppColors.customGradient, // Usamos el gradiente de tu tema
+          gradient: AppColors.customGradient, // Gradiente de tu tema
         ),
         child: SafeArea(
           child: Padding(
             padding: const EdgeInsets.all(16.0),
             child: FutureBuilder<List<dynamic>>(
-              future: boletasService.getBoletasEnProceso(),
+              // Usamos el future que tenemos en la variable
+              future: _futureBoletas,
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return const Center(child: CircularProgressIndicator());
@@ -52,9 +81,12 @@ class BoletasPage extends StatelessWidget {
                     itemCount: boletas.length,
                     itemBuilder: (context, index) {
                       final boleta = boletas[index];
+
+                      // Opcional: Imprimir para depurar
+                      // print("---- boleta (index=$index): $boleta");
+
                       return Card(
-                        margin: const EdgeInsets.symmetric(
-                            horizontal: 10, vertical: 10),
+                        margin: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
                         color: Colors.white.withOpacity(0.9),
                         elevation: 6,
                         shape: RoundedRectangleBorder(
@@ -82,8 +114,7 @@ class BoletasPage extends StatelessWidget {
                               ),
                               const SizedBox(height: 8),
                               Row(
-                                mainAxisAlignment:
-                                MainAxisAlignment.spaceBetween,
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                 children: [
                                   Text(
                                     'Estado: ${boleta['estado']}',
@@ -96,24 +127,38 @@ class BoletasPage extends StatelessWidget {
                                     ),
                                   ),
                                   ElevatedButton(
-                                    onPressed: () {
-                                      // Acción al completar la venta
-                                      ScaffoldMessenger.of(context).showSnackBar(
-                                        SnackBar(
-                                          content: Text('Venta completada para ${boleta['num_docum']}'),
+                                    onPressed: () async {
+                                      // Tomamos idmov y num_docum
+                                      final int idmov = boleta['idmov'] ?? 0;
+                                      final String numDocum = boleta['num_docum'] ?? "Sin doc";
+
+                                      // Navegamos a CompletarVentaPage y esperamos el resultado
+                                      final result = await Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => CompletarVentaPage(
+                                            idmov: idmov,
+                                            numDocum: numDocum,
+                                          ),
                                         ),
                                       );
+
+                                      // Si la página de completar venta devolvió true, recargamos boletas
+                                      if (result == true) {
+                                        setState(() {
+                                          _loadBoletas();
+                                        });
+                                      }
                                     },
                                     style: ElevatedButton.styleFrom(
                                       backgroundColor: AppColors.secondBlue,
-                                      foregroundColor: Colors.white, // Cambiamos el color del texto a blanco
+                                      foregroundColor: Colors.white,
                                       shape: RoundedRectangleBorder(
                                         borderRadius: BorderRadius.circular(12),
                                       ),
                                     ),
                                     child: const Text('Completar venta'),
                                   ),
-
                                 ],
                               ),
                             ],
