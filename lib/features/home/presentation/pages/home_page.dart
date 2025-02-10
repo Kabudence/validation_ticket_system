@@ -1,74 +1,145 @@
 import 'package:flutter/material.dart';
+import '../../../notification/data/notification_service.dart';
 import '../components/profile_header.dart';
 import '../components/stats_overview.dart';
 import '../components/quick_actions.dart';
 import '../components/calendar_widget.dart';
 import '../components/schedule_card.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
+
+  @override
+  _HomePageState createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final NotificationService _notificationService = NotificationService();
+  List<dynamic> _notificaciones = [];
+  bool _isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchNotificaciones();
+  }
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    _fetchNotificaciones(); // Llama al método para actualizar las notificaciones
+  }
+
+
+
+  Future<void> _fetchNotificaciones() async {
+    try {
+      List<dynamic> notificaciones = await _notificationService.getNotificationsByState("no_leido");
+
+      setState(() {
+        _notificaciones = notificaciones.map((notificacion) {
+          return {
+            "id": notificacion["id"] ?? 0,
+            "descripcion": notificacion["descripcion"] ?? "Descripción no disponible",
+            "numdocum": notificacion["numdocum_regmovcab"] ?? "Sin número de documento",
+          };
+        }).toList();
+        _isLoading = false;
+      });
+
+
+    } catch (e) {
+      print("Error cargando notificaciones: $e");
+      setState(() {
+        _isLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFDBE8FF), // Fondo azul claro
+      backgroundColor: const Color(0xFFDBE8FF),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Sección superior con superposición
             Stack(
-              clipBehavior: Clip.none, // Permite que los widgets se salgan del Stack
+              clipBehavior: Clip.none,
               children: [
                 Container(
-                  margin: const EdgeInsets.only(
-                    left: 10.0,
-                    right: 10.0,
-                  ),
+                  margin: const EdgeInsets.symmetric(horizontal: 10.0),
                   child: const ProfileHeader(),
                 ),
                 Positioned(
-                  top: 290, // Ajusta la posición vertical de QuickActions
+                  top: 254,
                   left: 10.0,
                   right: 10.0,
-                  child: const QuickActions(), // Acciones rápidas como elemento flotante
+                  child: const QuickActions(),
                 ),
                 Positioned(
-                  top: 380, // Controla la superposición de StatsOverview
+                  top: 340,
                   left: 16.0,
                   right: 16.0,
-                  child: const StatsOverview(), // Contenedor de estadísticas
+                  child: const StatsOverview(),
                 ),
               ],
             ),
-            const SizedBox(height: 47.0), // Espaciado entre StatsOverview y el siguiente bloque
-            // Sección inferior con scrollable content
+            const SizedBox(height: 47.0),
             Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const CalendarWidget(), // Calendario
-                    const SizedBox(height: 10.0),
-                    const ScheduleCard(
-                      subject: 'Biology',
-                      teacher: 'Floyd Miles',
-                      time: '07:00 - 07:45',
-                      duration: '15 min',
-                    ),
-                  ],
+              child: RefreshIndicator(
+                onRefresh: _fetchNotificaciones,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      const CalendarWidget(),
+                      const SizedBox(height: 10.0),
+                      const Padding(
+                        padding: EdgeInsets.only(left: 5.0, bottom: 8.0),
+                        child: Text(
+                          "No Leídos",
+                          style: TextStyle(
+                            fontSize: 23,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 10.0),
+                      _isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : _notificaciones.isEmpty
+                          ? const Center(
+                        child: Text(
+                          "No hay notificaciones pendientes",
+                          style: TextStyle(fontSize: 16, color: Colors.black54),
+                        ),
+                      )
+                          : Column(
+                        children: _notificaciones.map((notificacion) {
+                          return ScheduleCard(
+                            subject: notificacion["numdocum"] ?? "Sin número de documento",
+                            status: notificacion["descripcion"].contains("ALERTA") ? "Alerta" : "Venta",
+                            time: "Reciente",
+                            duration: "No leído",
+                          );
+
+                        }).toList(),
+
+                      ),
+                    ],
+                  ),
                 ),
               ),
             ),
           ],
         ),
       ),
-      // Barra de navegación inferior
       bottomNavigationBar: Container(
         height: 70,
         decoration: BoxDecoration(
-          color: const Color(0xFF2B2E40), // Azul oscuro para la barra inferior
+          color: const Color(0xFF2B2E40),
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(20.0),
             topRight: Radius.circular(20.0),
@@ -78,23 +149,29 @@ class HomePage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _buildNavItem(Icons.home, 'Home', true, context),
-            _buildNavItem(Icons.dashboard, 'Dashboard', false, context),
             _buildNavItem(Icons.notifications, 'Notifications', false, context),
+            _buildNavItem(Icons.add_a_photo_rounded, 'Ventas Diarias', false, context),
             _buildNavItem(Icons.sticky_note_2, 'Boletas', false, context),
+
           ],
         ),
       ),
     );
   }
 
-  // Método para construir cada botón de navegación inferior
   Widget _buildNavItem(IconData icon, String label, bool isSelected, BuildContext context) {
     return GestureDetector(
       onTap: () {
         if (label == 'Boletas') {
-          Navigator.pushNamed(context, '/boletas'); // Navega a la ruta 'boletas'
+          Navigator.pushNamed(context, '/boletas');
+        }  if (label == 'Notifications') {
+          Navigator.pushNamed(context, '/notifications');
+        } if (label == 'Home') {
+          Navigator.pushNamed(context, '/home');
+        }if (label == 'Ventas Diarias') {
+          Navigator.pushNamed(context, '/ventas_diarias');
         }
-        // Puedes agregar más condiciones para otras rutas
+
       },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -116,4 +193,29 @@ class HomePage extends StatelessWidget {
       ),
     );
   }
+
+}
+
+
+String extractProductDetails(String message) {
+  // Expresión regular para productos modificados
+  RegExp productRegex = RegExp(r'([\w\s\d\.\-]+:\s-\d+\.\d+\s+unidades,\s+Stock\s+actual:\s+\d+\.\d+)', multiLine: true);
+
+  // Expresión regular para alertas
+  RegExp alertRegex = RegExp(r'ALERTA:.*?\(.*?\)', multiLine: true);
+
+  // Buscar coincidencias de productos modificados
+  Iterable<Match> productMatches = productRegex.allMatches(message);
+
+  // Buscar coincidencias de alertas
+  Iterable<Match> alertMatches = alertRegex.allMatches(message);
+
+  // Combinar las coincidencias de productos y alertas
+  List<String> detalles = [
+    ...productMatches.map((match) => match.group(0)!),
+    ...alertMatches.map((match) => match.group(0)!)
+  ];
+
+  // Unir los detalles en un solo string con saltos de línea
+  return detalles.join("\n");
 }
