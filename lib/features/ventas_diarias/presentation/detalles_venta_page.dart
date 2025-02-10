@@ -73,11 +73,30 @@ class _DetallesVentaPageState extends State<DetallesVentaPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Detalles de la venta"),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        centerTitle: true,
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(56.0), // Altura estándar del AppBar
+        child: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                Color(0xFF2E1C9C), // Azul más oscuro
+                Color(0xFFA16EFF), // Lavanda claro
+              ],
+            ),
+          ),
+          child: AppBar(
+            title: const Text(
+              "Ventas Diarias",
+              style: TextStyle(color: Colors.white),
+            ),
+            centerTitle: true,
+            backgroundColor: Colors.transparent, // Fondo transparente para mostrar el gradiente
+            elevation: 0, // Eliminar la sombra
+            iconTheme: const IconThemeData(color: Colors.white), // Íconos en blanco
+          ),
+        ),
       ),
       body: isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -96,8 +115,8 @@ class _DetallesVentaPageState extends State<DetallesVentaPage> {
               Center(
                 child: Image.memory(
                   base64Decode(currentPhoto!['foto_codigo']),
-                  height: 400,
-                  width: 400,
+                  height: 300,
+                  width: 300,
                   fit: BoxFit.contain,
                 ),
               ),
@@ -144,7 +163,7 @@ class _DetallesVentaPageState extends State<DetallesVentaPage> {
                   ),
                   ElevatedButton(
                     onPressed: hasNext ? nextPhoto : null,
-                    child: const Text("Siguiente"),
+                    child: const Text("Siguiente")
                   ),
                 ],
               ),
