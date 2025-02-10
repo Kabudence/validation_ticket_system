@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
-
 import '../data/ventas_diarias_service.dart';
 
 class DetallesVentaPage extends StatefulWidget {
@@ -14,132 +13,146 @@ class DetallesVentaPage extends StatefulWidget {
 
 class _DetallesVentaPageState extends State<DetallesVentaPage> {
   final VentasDiariasService _ventasDiariasService = VentasDiariasService();
-  List<dynamic> _detalles = [];
-  bool _isLoading = true;
+  Map<String, dynamic>? currentPhoto;
+  bool isLoading = true;
+  int currentIndex = 0;
+  bool hasNext = false;
+  final int paginationLimit = 2; // Solicitamos 2 fotos para detectar si hay siguiente
 
   @override
   void initState() {
     super.initState();
-    _fetchDetalles();
+    loadPhoto();
   }
 
-  Future<void> _fetchDetalles() async {
+  Future<void> loadPhoto() async {
+    setState(() {
+      isLoading = true;
+    });
     try {
-      final detalles = await _ventasDiariasService.getFotosByIdCab(widget.idcab);
-      setState(() {
-        _detalles = detalles;
-        _isLoading = false;
-      });
+      // Solicitamos 2 fotos; si la respuesta tiene 2 elementos, entonces existe una siguiente.
+      final List<dynamic> photos = await _ventasDiariasService
+          .getFotosByIdCabWithPagination(widget.idcab, currentIndex, paginationLimit);
+      if (photos.isNotEmpty) {
+        setState(() {
+          currentPhoto = photos[0] as Map<String, dynamic>;
+          hasNext = photos.length > 1;
+        });
+      } else {
+        setState(() {
+          currentPhoto = null;
+          hasNext = false;
+        });
+      }
     } catch (e) {
-      print('Error al obtener los detalles: $e');
-      setState(() {
-        _isLoading = false;
-      });
+      print("Error al cargar la foto: $e");
     }
+    setState(() {
+      isLoading = false;
+    });
+  }
+
+  void nextPhoto() {
+    if (!hasNext) return;
+    setState(() {
+      currentIndex++;
+    });
+    loadPhoto();
+  }
+
+  void previousPhoto() {
+    if (currentIndex <= 0) return;
+    setState(() {
+      currentIndex--;
+      // Al retroceder asumimos que seguramente habrá un siguiente (o se recarga la foto correspondiente).
+      hasNext = true;
+    });
+    loadPhoto();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56.0), // Altura estándar del AppBar
-        child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [
-                Color(0xFF2E1C9C), // Azul más oscuro
-                Color(0xFFA16EFF), // Lavanda claro
-              ],
-            ),
-          ),
-          child: AppBar(
-            title: const Text(
-              "Detalles de la venta",
-              style: TextStyle(color: Colors.white),
-            ),
-            centerTitle: true,
-            backgroundColor: Colors.transparent,
-            elevation: 0,
-            iconTheme: const IconThemeData(color: Colors.white),
-          ),
-        ),
+      appBar: AppBar(
+        title: const Text("Detalles de la venta"),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        centerTitle: true,
       ),
-      body: _isLoading
+      body: isLoading
           ? const Center(child: CircularProgressIndicator())
-          : _detalles.isEmpty
-          ? const Center(
-        child: Text(
-          "No se encontraron detalles para esta venta.",
-          style: TextStyle(fontSize: 16, color: Colors.black54),
+          : currentPhoto == null
+          ? const Center(child: Text("Sin foto disponible"))
+          : SingleChildScrollView(
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              // Título con el nombre del producto
+
+              const SizedBox(height: 16),
+              // Imagen más grande
+              Center(
+                child: Image.memory(
+                  base64Decode(currentPhoto!['foto_codigo']),
+                  height: 400,
+                  width: 400,
+                  fit: BoxFit.contain,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                currentPhoto!['nombre_producto'] ?? "Producto sin nombre",
+                style: const TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              // Información de precio vendido y cantidad en una fila
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    "Precio vendido: ${currentPhoto!['precio_vendido']}",
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                  const SizedBox(width: 16),
+                  Text(
+                    "Cantidad: ${currentPhoto!['cantidad']}",
+                    style: const TextStyle(fontSize: 16),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              // Fecha al final
+              Text(
+                "Fecha: ${currentPhoto!['fecha']}",
+                style: const TextStyle(fontSize: 16),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 16),
+              // Botones de navegación
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  ElevatedButton(
+                    onPressed: currentIndex > 0 ? previousPhoto : null,
+                    child: const Text("Anterior"),
+                  ),
+                  ElevatedButton(
+                    onPressed: hasNext ? nextPhoto : null,
+                    child: const Text("Siguiente"),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text("Foto ${currentIndex + 1}"),
+            ],
+          ),
         ),
-      )
-          : ListView.builder(
-        padding: const EdgeInsets.all(16.0),
-        itemCount: _detalles.length,
-        itemBuilder: (context, index) {
-          final detalle = _detalles[index];
-          // Dentro del itemBuilder o en el FutureBuilder:
-          return FutureBuilder(
-            future: _ventasDiariasService.getFotosByIdCab(detalle['idcab']),
-            builder: (context, snapshot) {
-              if (snapshot.connectionState == ConnectionState.waiting) {
-                return const Center(child: CircularProgressIndicator());
-              } else if (snapshot.hasError) {
-                return const Text("Error al cargar la imagen");
-              } else {
-                // snapshot.data debe ser List<dynamic>
-                final fotosList = snapshot.data as List<dynamic>;
-                String? fotoBase64;
-                if (fotosList.isNotEmpty) {
-                  // Se asume que cada elemento es un Map con la clave 'foto_codigo'
-                  final Map<String, dynamic> primeraFoto = fotosList[0] as Map<String, dynamic>;
-                  fotoBase64 = primeraFoto['foto_codigo'] as String?;
-                }
-                return Container(
-                  margin: const EdgeInsets.symmetric(vertical: 8.0),
-                  padding: const EdgeInsets.all(16.0),
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(12),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
-                      ),
-                    ],
-                  ),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.center,
-                    children: [
-                      Text(
-                        "Producto: ${detalle['nombre_producto']}",
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                      const SizedBox(height: 4),
-                      fotoBase64 != null
-                          ? Image.memory(
-                        base64Decode(fotoBase64),
-                        height: 100,
-                        width: 100,
-                        fit: BoxFit.cover,
-                      )
-                          : const Text("Sin foto disponible"),
-                      const SizedBox(height: 8),
-                      Text("Fecha: ${detalle['fecha']}"),
-                    ],
-                  ),
-                );
-              }
-            },
-          );
-        },
       ),
     );
   }
