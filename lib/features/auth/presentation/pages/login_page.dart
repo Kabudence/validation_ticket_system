@@ -35,14 +35,20 @@ class _LoginPageState extends State<LoginPage> {
       final response = await AuthService.login(username, password);
       final authData = AuthModel.fromJson(response);
 
-      // Guardar el token y otros datos en SharedPreferences
+      // Guardar el token y rol en SharedPreferences
       final SharedPreferences prefs = await SharedPreferences.getInstance();
       await prefs.setString('authToken', authData.token);
       await prefs.setString('role', authData.role);
       await prefs.setString('username', authData.username);
 
-      // Redirigir a la pantalla principal
-      Navigator.pushReplacementNamed(context, '/home');
+      // Redirigir según el rol
+      if (authData.role == 'admin') {
+        // Para admin, a la ruta /home
+        Navigator.pushReplacementNamed(context, '/home');
+      } else {
+        // Si el rol es distinto de admin, a /boletas
+        Navigator.pushReplacementNamed(context, '/boletas');
+      }
     } catch (e) {
       _showErrorDialog(e.toString());
     } finally {
@@ -84,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                   child: Container(
                     height: 400,
                     decoration: const BoxDecoration(
-                      gradient: AppColors.customGradient, // Nuevo gradiente
+                      gradient: AppColors.customGradient,
                     ),
                   ),
                 ),
@@ -124,32 +130,28 @@ class _LoginPageState extends State<LoginPage> {
                         style: TextStyle(
                           fontSize: 24,
                           fontWeight: FontWeight.bold,
-                          color: const Color(0xFF2B2E40),
+                          color: Color(0xFF2B2E40),
                         ),
                       ),
-
                     ],
                   ),
                 ),
               ],
             ),
             Expanded(
-
               child: SingleChildScrollView(
-
                 padding: const EdgeInsets.symmetric(horizontal: 30.0),
                 child: Column(
                   children: [
-
-                    const SizedBox(height:10),
+                    const SizedBox(height: 10),
                     TextField(
                       controller: _usernameController,
                       decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.person, color: Color(0xFF2E1C9C)), // Color oscuro del gradiente
+                        prefixIcon: const Icon(Icons.person, color: Color(0xFF2E1C9C)),
                         labelText: 'Username',
-                        labelStyle: const TextStyle(color: Color(0xFF2E1C9C)), // Color del gradiente
+                        labelStyle: const TextStyle(color: Color(0xFF2E1C9C)),
                         filled: true,
-                        fillColor: const Color(0xFF2E1C9C).withOpacity(0.1), // Fondo con opacidad
+                        fillColor: const Color(0xFF2E1C9C).withOpacity(0.1),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.0),
                           borderSide: BorderSide.none,
@@ -161,11 +163,11 @@ class _LoginPageState extends State<LoginPage> {
                       controller: _passwordController,
                       obscureText: true,
                       decoration: InputDecoration(
-                        prefixIcon: const Icon(Icons.lock, color: Color(0xFF2E1C9C)), // Color oscuro del gradiente
+                        prefixIcon: const Icon(Icons.lock, color: Color(0xFF2E1C9C)),
                         labelText: 'Password',
-                        labelStyle: const TextStyle(color: Color(0xFF2E1C9C)), // Color del gradiente
+                        labelStyle: const TextStyle(color: Color(0xFF2E1C9C)),
                         filled: true,
-                        fillColor: const Color(0xFF2E1C9C).withOpacity(0.1), // Fondo con opacidad
+                        fillColor: const Color(0xFF2E1C9C).withOpacity(0.1),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12.0),
                           borderSide: BorderSide.none,
@@ -176,7 +178,7 @@ class _LoginPageState extends State<LoginPage> {
                     ElevatedButton(
                       onPressed: _isLoading ? null : _login,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2E1C9C), // Color del gradiente
+                        backgroundColor: const Color(0xFF2E1C9C),
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16.0),
                         minimumSize: const Size(double.infinity, 50),
@@ -204,7 +206,7 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                         GestureDetector(
                           onTap: () {
-                            // Navegar a la página de inicio de sesión
+                            // Navegar a otra pantalla
                           },
                           child: Text(
                             'Sign In',
