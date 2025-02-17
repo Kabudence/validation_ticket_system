@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../notification/data/notification_service.dart';
 
 class NotificationsPage extends StatefulWidget {
@@ -10,13 +11,50 @@ class NotificationsPage extends StatefulWidget {
 
 class _NotificationsPageState extends State<NotificationsPage> {
   final NotificationService _notificationService = NotificationService();
+
   List<dynamic> _notificaciones = [];
   bool _isLoading = true;
+
+  bool _hasAccess = false; // Controla si el usuario tiene rol admin
 
   @override
   void initState() {
     super.initState();
-    _fetchAllNotifications();
+    _checkRoleAndLoadData();
+  }
+
+  // Verificamos el rol y, si es admin, cargamos las notificaciones.
+  Future<void> _checkRoleAndLoadData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? role = prefs.getString('role');
+
+    if (role == 'admin') {
+      setState(() {
+        _hasAccess = true;
+      });
+      _fetchAllNotifications();
+    } else {
+      _showNoAccessDialog();
+    }
+  }
+
+  void _showNoAccessDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Acceso denegado'),
+        content: const Text('No tienes permisos para acceder a esta página.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Cierra el diálogo
+              Navigator.of(context).pop(); // Regresa a la pantalla anterior
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
 
   Future<void> _fetchAllNotifications() async {
@@ -25,7 +63,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
       final noLeidas = await _notificationService.getNotificationsByState("no_leido");
 
       setState(() {
-        // Asignar estado "leido" o "no_leido" manualmente y manejar valores nulos
         _notificaciones = [
           ...noLeidas.map((n) => {
             ...n,
@@ -61,18 +98,32 @@ class _NotificationsPageState extends State<NotificationsPage> {
 
   @override
   Widget build(BuildContext context) {
+    // Si el rol aún no se ha validado (y no cargamos notificaciones),
+    // mostramos un loader mientras `_checkRoleAndLoadData` se ejecuta.
+    if (!_hasAccess && _isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    // Si el rol no es admin, salimos (la alerta ya se mostró).
+    if (!_hasAccess) {
+      return const Scaffold(body: SizedBox());
+    }
+
+    // Aquí ya es admin: mostramos la UI de notificaciones.
     return Scaffold(
       backgroundColor: const Color(0xFFDBE8FF),
       appBar: PreferredSize(
-        preferredSize: const Size.fromHeight(56.0), // Altura estándar del AppBar
+        preferredSize: const Size.fromHeight(56.0),
         child: Container(
           decoration: const BoxDecoration(
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
               colors: [
-                Color(0xFF2E1C9C), // Azul más oscuro
-                Color(0xFFA16EFF), // Lavanda claro
+                Color(0xFF2E1C9C),
+                Color(0xFFA16EFF),
               ],
             ),
           ),
@@ -82,9 +133,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
               style: TextStyle(color: Colors.white),
             ),
             centerTitle: true,
-            backgroundColor: Colors.transparent, // Fondo transparente para mostrar el gradiente
-            elevation: 0, // Eliminar la sombra
-            iconTheme: const IconThemeData(color: Colors.white), // Íconos en blanco
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            iconTheme: const IconThemeData(color: Colors.white),
           ),
         ),
       ),
@@ -107,7 +158,6 @@ class _NotificationsPageState extends State<NotificationsPage> {
             final descripcion = notificacion["descripcion"] ?? "";
             final numdocum = notificacion["numdocum_regmovcab"] ?? "SIN_DOC";
 
-            // Verificar si es una alerta
             final isAlerta = descripcion.contains("ALERTA");
 
             return GestureDetector(
@@ -119,10 +169,10 @@ class _NotificationsPageState extends State<NotificationsPage> {
                 padding: const EdgeInsets.all(16.0),
                 decoration: BoxDecoration(
                   color: isAlerta
-                      ? Colors.red[100] // Fondo rojo claro para alertas
+                      ? Colors.red[100]
                       : (isLeido
-                      ? Colors.grey[300] // Fondo gris claro para leídas
-                      : Colors.white), // Fondo blanco para no leídas
+                      ? Colors.grey[300]
+                      : Colors.white),
                   borderRadius: BorderRadius.circular(12),
                   boxShadow: [
                     BoxShadow(
@@ -136,10 +186,12 @@ class _NotificationsPageState extends State<NotificationsPage> {
                   children: [
                     Icon(
                       isAlerta
-                          ? Icons.warning // Ícono de advertencia para alertas
-                          : (isLeido ? Icons.check_circle : Icons.notifications),
+                          ? Icons.warning
+                          : (isLeido
+                          ? Icons.check_circle
+                          : Icons.notifications),
                       color: isAlerta
-                          ? Colors.red // Ícono rojo para alertas
+                          ? Colors.red
                           : (isLeido ? Colors.green : Colors.blue),
                       size: 40,
                     ),
@@ -156,7 +208,9 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               fontWeight: FontWeight.bold,
                               color: isAlerta
                                   ? Colors.red[900]
-                                  : (isLeido ? Colors.black54 : Colors.black),
+                                  : (isLeido
+                                  ? Colors.black54
+                                  : Colors.black),
                             ),
                           ),
                           const SizedBox(height: 4),
@@ -168,25 +222,30 @@ class _NotificationsPageState extends State<NotificationsPage> {
                               fontWeight: FontWeight.w500,
                               color: isAlerta
                                   ? Colors.red[900]
-                                  : (isLeido ? Colors.black54 : Colors.black87),
+                                  : (isLeido
+                                  ? Colors.black54
+                                  : Colors.black87),
                             ),
                           ),
                           const SizedBox(height: 8),
                           // 3) ALERTA / "Leído" / "No leído"
                           Text(
-                            isAlerta ? "ALERTA" : (isLeido ? "Leído" : "No leído"),
+                            isAlerta
+                                ? "ALERTA"
+                                : (isLeido ? "Leído" : "No leído"),
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.bold,
                               color: isAlerta
                                   ? Colors.red
-                                  : (isLeido ? Colors.black54 : Colors.blue),
+                                  : (isLeido
+                                  ? Colors.black54
+                                  : Colors.blue),
                             ),
                           ),
                         ],
                       ),
                     ),
-                    // Flecha solo para "no leído" que no sea alerta
                     if (!isLeido && !isAlerta)
                       const Icon(
                         Icons.arrow_forward_ios,
