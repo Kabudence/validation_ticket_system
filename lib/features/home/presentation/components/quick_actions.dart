@@ -13,16 +13,7 @@ class QuickActions extends StatelessWidget {
         child: Row(
           children: [
             const SizedBox(width: 12.0), // Espaciado inicial
-            _QuickActionItem(
-              icon: Icons.rocket_launch,
-              label: "Academic success",
-              color: const Color(0xFF7D54E0), // Púrpura vibrante (armonizado)
-            ),
-            _QuickActionItem(
-              icon: Icons.menu_book,
-              label: "Homework",
-              color: const Color(0xFF7056D2), // Púrpura más claro
-            ),
+
             _QuickActionItem(
               icon: Icons.warning,
               label: "Notifications",
@@ -33,6 +24,12 @@ class QuickActions extends StatelessWidget {
               label: "Profile",
               color: const Color(0xFF2E1C9C), // Azul oscuro
             ),
+            _QuickActionItem(
+              icon: Icons.rocket_launch,
+              label: "Performance",
+              color: const Color(0xFF7D54E0), // Púrpura vibrante (armonizado)
+            ),
+
             const SizedBox(width: 12.0), // Espaciado final
           ],
         ),
