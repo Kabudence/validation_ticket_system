@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:movil_validation_app/features/boletas/presentation/pages/boletas_page.dart';
-import 'package:movil_validation_app/features/boletas/presentation/pages/completar_venta_page.dart';
 import 'package:movil_validation_app/features/home/presentation/pages/home_page.dart';
 import 'package:movil_validation_app/features/notification/presentation/pages/notifications_page.dart';
 import 'package:movil_validation_app/features/ventas_diarias/presentation/ventas_diarias_page.dart';
