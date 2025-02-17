@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../../../notification/data/notification_service.dart';
 import '../components/profile_header.dart';
 import '../components/stats_overview.dart';
@@ -15,25 +16,59 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   final NotificationService _notificationService = NotificationService();
+
   List<dynamic> _notificaciones = [];
   bool _isLoading = true;
+
+  /// Indica si el usuario tiene acceso (es admin)
+  bool _hasAccess = false;
 
   @override
   void initState() {
     super.initState();
-    _fetchNotificaciones();
-  }
-  @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    _fetchNotificaciones(); // Llama al método para actualizar las notificaciones
+    _checkRoleAndLoadData();
   }
 
+  /// Verificamos el rol y, si es admin, cargamos las notificaciones.
+  Future<void> _checkRoleAndLoadData() async {
+    final prefs = await SharedPreferences.getInstance();
+    final String? role = prefs.getString('role');
 
+    if (role == 'admin') {
+      // Usuario admin
+      setState(() {
+        _hasAccess = true;
+      });
+      _fetchNotificaciones();
+    } else {
+      // Usuario sin permisos
+      _showNoAccessDialog();
+    }
+  }
+
+  void _showNoAccessDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Acceso denegado'),
+        content: const Text('No tienes permisos para acceder a esta página.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.of(context).pop(); // Cerrar el diálogo
+              Navigator.of(context).pop(); // Regresar a la pantalla anterior
+            },
+            child: const Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
 
   Future<void> _fetchNotificaciones() async {
     try {
-      List<dynamic> notificaciones = await _notificationService.getNotificationsByState("no_leido");
+      List<dynamic> notificaciones =
+      await _notificationService.getNotificationsByState("no_leido");
 
       setState(() {
         _notificaciones = notificaciones.map((notificacion) {
@@ -45,8 +80,6 @@ class _HomePageState extends State<HomePage> {
         }).toList();
         _isLoading = false;
       });
-
-
     } catch (e) {
       print("Error cargando notificaciones: $e");
       setState(() {
@@ -57,6 +90,20 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // Mientras validamos el rol, podemos mostrar un loader
+    if (!_hasAccess && _isLoading) {
+      return const Scaffold(
+        body: Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    // Si no tiene acceso (rol != admin) nos quedamos con un scaffold vacío
+    // (El diálogo de acceso denegado ya lo sacó con pop).
+    if (!_hasAccess) {
+      return const Scaffold(body: SizedBox());
+    }
+
+    // En este punto, sabemos que es admin (_hasAccess = true)
     return Scaffold(
       backgroundColor: const Color(0xFFDBE8FF),
       body: SafeArea(
@@ -76,15 +123,16 @@ class _HomePageState extends State<HomePage> {
                   right: 10.0,
                   child: const QuickActions(),
                 ),
-                Positioned(
-                  top: 340,
-                  left: 16.0,
-                  right: 16.0,
-                  child: const StatsOverview(),
-                ),
+                // Ejemplo si quieres volver a activar StatsOverview
+                // Positioned(
+                //   top: 340,
+                //   left: 16.0,
+                //   right: 16.0,
+                //   child: const StatsOverview(),
+                // ),
               ],
             ),
-            const SizedBox(height: 47.0),
+            const SizedBox(height: 10.0),
             Expanded(
               child: RefreshIndicator(
                 onRefresh: _fetchNotificaciones,
@@ -119,14 +167,15 @@ class _HomePageState extends State<HomePage> {
                           : Column(
                         children: _notificaciones.map((notificacion) {
                           return ScheduleCard(
-                            subject: notificacion["numdocum"] ?? "Sin número de documento",
-                            status: notificacion["descripcion"].contains("ALERTA") ? "Alerta" : "Venta",
+                            subject: notificacion["numdocum"] ??
+                                "Sin número de documento",
+                            status: notificacion["descripcion"].contains("ALERTA")
+                                ? "Alerta"
+                                : "Venta",
                             time: "Reciente",
                             duration: "No leído",
                           );
-
                         }).toList(),
-
                       ),
                     ],
                   ),
@@ -152,7 +201,6 @@ class _HomePageState extends State<HomePage> {
             _buildNavItem(Icons.notifications, 'Notifications', false, context),
             _buildNavItem(Icons.add_a_photo_rounded, 'Ventas Diarias', false, context),
             _buildNavItem(Icons.sticky_note_2, 'Boletas', false, context),
-
           ],
         ),
       ),
@@ -164,14 +212,13 @@ class _HomePageState extends State<HomePage> {
       onTap: () {
         if (label == 'Boletas') {
           Navigator.pushNamed(context, '/boletas');
-        }  if (label == 'Notifications') {
+        } else if (label == 'Notifications') {
           Navigator.pushNamed(context, '/notifications');
-        } if (label == 'Home') {
+        } else if (label == 'Home') {
           Navigator.pushNamed(context, '/home');
-        }if (label == 'Ventas Diarias') {
+        } else if (label == 'Ventas Diarias') {
           Navigator.pushNamed(context, '/ventas_diarias');
         }
-
       },
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -193,29 +240,30 @@ class _HomePageState extends State<HomePage> {
       ),
     );
   }
-
 }
 
-
+/// Ejemplo de helper para extraer detalles de productos o alertas
 String extractProductDetails(String message) {
   // Expresión regular para productos modificados
-  RegExp productRegex = RegExp(r'([\w\s\d\.\-]+:\s-\d+\.\d+\s+unidades,\s+Stock\s+actual:\s+\d+\.\d+)', multiLine: true);
+  RegExp productRegex = RegExp(
+    r'([\w\s\d\.\-]+:\s-\d+\.\d+\s+unidades,\s+Stock\s+actual:\s+\d+\.\d+)',
+    multiLine: true,
+  );
 
   // Expresión regular para alertas
   RegExp alertRegex = RegExp(r'ALERTA:.*?\(.*?\)', multiLine: true);
 
   // Buscar coincidencias de productos modificados
   Iterable<Match> productMatches = productRegex.allMatches(message);
-
   // Buscar coincidencias de alertas
   Iterable<Match> alertMatches = alertRegex.allMatches(message);
 
-  // Combinar las coincidencias de productos y alertas
+  // Combinar en una lista
   List<String> detalles = [
     ...productMatches.map((match) => match.group(0)!),
-    ...alertMatches.map((match) => match.group(0)!)
+    ...alertMatches.map((match) => match.group(0)!),
   ];
 
-  // Unir los detalles en un solo string con saltos de línea
+  // Unir en un string con saltos de línea
   return detalles.join("\n");
 }
