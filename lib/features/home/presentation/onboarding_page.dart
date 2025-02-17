@@ -7,10 +7,9 @@ class OnboardingPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      // Aplicamos el gradiente al fondo
       body: Container(
         decoration: const BoxDecoration(
-          gradient: AppColors.customGradient, // Gradiente definido
+          gradient: AppColors.customGradient,
         ),
         child: SafeArea(
           child: Padding(
@@ -19,26 +18,25 @@ class OnboardingPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 const SizedBox(height: 16.0),
-                // Imagen en la parte superior con bordes redondeados
                 Expanded(
                   flex: 2,
                   child: Center(
                     child: Container(
-                      margin: const EdgeInsets.symmetric(horizontal: 5.0), // Márgenes a los lados
+                      margin: const EdgeInsets.symmetric(horizontal: 5.0),
                       height: 400,
                       width: 400,
                       decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(20.0), // Bordes redondeados
+                        borderRadius: BorderRadius.circular(20.0),
                         boxShadow: [
                           BoxShadow(
                             color: Colors.black.withOpacity(0.2),
                             blurRadius: 10,
-                            offset: const Offset(0, 5), // Sombra hacia abajo
+                            offset: const Offset(0, 5),
                           ),
                         ],
                         image: const DecorationImage(
                           image: AssetImage('assets/images/img_fount.png'),
-                          fit: BoxFit.cover, // Ajusta la imagen al contenedor
+                          fit: BoxFit.cover,
                         ),
                       ),
                     ),
@@ -53,12 +51,12 @@ class OnboardingPage extends StatelessWidget {
                       'Control everything  anywhere',
                       textAlign: TextAlign.left,
                       style: const TextStyle(
-                        fontSize: 48.0, // Tamaño más grande para asemejar la imagen
-                        fontWeight: FontWeight.w800, // Peso más grueso
+                        fontSize: 48.0,
+                        fontWeight: FontWeight.w800,
                         color: Colors.white,
                         fontFamily: 'OpenSans',
-                        height: 1.4, // Espaciado entre líneas
-                        letterSpacing: 0.5, // Espaciado entre letras
+                        height: 1.4,
+                        letterSpacing: 0.5,
                       ),
                     ),
                   ),
