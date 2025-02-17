@@ -8,7 +8,7 @@ class ProfileHeader extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       width: double.infinity, // Ocupa todo el ancho de la pantalla
-      padding: const EdgeInsets.only(top: 20.0, bottom: 140.0),
+      padding: const EdgeInsets.only(top: 20.0, bottom: 95.0),
       decoration: BoxDecoration(
         gradient: AppColors.customGradient, // Gradiente definido en AppColors
         borderRadius: const BorderRadius.only(
