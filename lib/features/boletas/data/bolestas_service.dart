@@ -79,6 +79,7 @@ class BoletasService {
         '/regmovcab/change-state-to-complete/$idmov',
         data: {"vendedor": vendedor},
       );
+      print(response);
       return response.data;
     } catch (e) {
       throw Exception('Failed to change state to complete: $e');

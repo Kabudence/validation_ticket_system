@@ -40,17 +40,18 @@ class _CompletarVentaPageState extends State<CompletarVentaPage> {
       isLoading = true;
     });
     try {
-      // LOG:
-      print("LOG: Cargando detalles con getRegmovdetByIdcab(${widget.idmov})...");
+
 
       var result = await boletasService.getRegmovdetByIdcab(widget.idmov);
 
-      // LOG:
-      print("LOG: Resultado de getRegmovdetByIdcab => $result");
-
+      // Aplicar la conversión del precio al 100%
       setState(() {
-        items = result;
+        items = result.map((item) {
+          double precioOriginal = (item['precio'] as num).toDouble() / 0.82; // Ajuste del precio
+          return {...item, 'precio': precioOriginal}; // Crear nuevo mapa con el precio ajustado
+        }).toList();
       });
+
     } catch (e) {
       print("Error al cargar detalles: $e");
     }
@@ -67,7 +68,7 @@ class _CompletarVentaPageState extends State<CompletarVentaPage> {
       // Comprimir la imagen usando flutter_image_compress
       final compressedBytes = await FlutterImageCompress.compressWithFile(
         image.path,
-        quality: 40, // Ajusta la calidad según lo necesites (valor entre 0 y 100)
+        quality: 30, // Ajusta la calidad según lo necesites (valor entre 0 y 100)
         // Opcional: puedes definir targetWidth o targetHeight para redimensionar
         // targetWidth: 800,
         // targetHeight: 600,

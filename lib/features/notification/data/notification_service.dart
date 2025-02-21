@@ -25,7 +25,7 @@ class NotificationService {
       }
 
       final response = await _dio.get(
-        '/notificaciones',
+        '/notificaciones/',
         queryParameters: {
           'estado': estado,
         },
