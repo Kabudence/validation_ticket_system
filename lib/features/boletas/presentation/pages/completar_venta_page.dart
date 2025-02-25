@@ -17,7 +17,9 @@ class CompletarVentaPage extends StatefulWidget {
 
   @override
   _CompletarVentaPageState createState() => _CompletarVentaPageState();
+
 }
+
 
 class _CompletarVentaPageState extends State<CompletarVentaPage> {
   final BoletasService boletasService = BoletasService();
@@ -27,6 +29,9 @@ class _CompletarVentaPageState extends State<CompletarVentaPage> {
   Map<int, String> fotosSubidas = {}; // iddet -> foto_id
 
   bool isLoading = false;
+
+
+
 
   @override
   void initState() {
