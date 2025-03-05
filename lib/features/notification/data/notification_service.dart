@@ -40,4 +40,24 @@ class NotificationService {
       throw Exception('Failed to fetch notifications by state: $e');
     }
   }
+
+  static Future<void> sendSaleNotification({
+    required int userId,
+    required String saleId,
+    required String saleNumber,
+  }) async {
+    try {
+      await Api.dio.post(
+        '/user-token/send',
+        data: {
+          'user_id': userId,
+          'title': 'Nueva Venta Completada',
+          'body': 'Venta $saleNumber registrada exitosamente'
+        },
+      );
+    } catch (e) {
+      throw Exception('Error enviando notificación: $e');
+    }
+  }
+
 }

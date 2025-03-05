@@ -1,9 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import '../../../notification/data/notification_service.dart';
 import '../../data/bolestas_service.dart';
 import '../../../../core/constants/app_colors.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:http/http.dart' as http;
 
 class CompletarVentaPage extends StatefulWidget {
   final int idmov;       // El ID de la boleta (regmovcab)
@@ -19,6 +21,8 @@ class CompletarVentaPage extends StatefulWidget {
   _CompletarVentaPageState createState() => _CompletarVentaPageState();
 
 }
+
+
 
 
 class _CompletarVentaPageState extends State<CompletarVentaPage> {
@@ -109,6 +113,11 @@ class _CompletarVentaPageState extends State<CompletarVentaPage> {
     }
   }
 
+
+
+
+
+
   Future<void> completarVenta() async {
     String vendedor = vendedorController.text.trim();
     if (vendedor.isEmpty) {
@@ -125,6 +134,8 @@ class _CompletarVentaPageState extends State<CompletarVentaPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Venta completada con éxito")),
       );
+
+
       Navigator.pop(context,true);
     } catch (e) {
       print("Error completando venta: $e");

@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/constants/app_colors.dart';
 import '../../../../shared/wave_clipper.dart';
 import '../../data/auth_service.dart';
 import '../../domain/auth_model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -11,6 +13,8 @@ class LoginPage extends StatefulWidget {
   @override
   State<LoginPage> createState() => _LoginPageState();
 }
+
+ final storage = FlutterSecureStorage();
 
 class _LoginPageState extends State<LoginPage> {
   final TextEditingController _usernameController = TextEditingController();
@@ -40,15 +44,17 @@ class _LoginPageState extends State<LoginPage> {
       await prefs.setString('authToken', authData.token);
       await prefs.setString('role', authData.role);
       await prefs.setString('username', authData.username);
+      await storage.write(key: 'jwt_token', value: authData.token); // authData.token viene de la respuesta del servidor
+      print('Token almacenado: $storage'); // Debe coincidir con el token recibido del servidor
 
-      // Redirigir según el rol
+
+      // En _login() después de guardar el token:
       if (authData.role == 'admin') {
-        // Para admin, a la ruta /home
-        Navigator.pushReplacementNamed(context, '/home');
+        Navigator.pushNamedAndRemoveUntil(context, '/home', (route) => false);
       } else {
-        // Si el rol es distinto de admin, a /boletas
-        Navigator.pushReplacementNamed(context, '/boletas');
+        Navigator.pushNamedAndRemoveUntil(context, '/boletas', (route) => false);
       }
+
     } catch (e) {
       _showErrorDialog(e.toString());
     } finally {
@@ -56,6 +62,10 @@ class _LoginPageState extends State<LoginPage> {
         _isLoading = false;
       });
     }
+  }
+  Future<void> saveLoginState() async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isLoggedIn', true);
   }
 
   void _showErrorDialog(String message) {

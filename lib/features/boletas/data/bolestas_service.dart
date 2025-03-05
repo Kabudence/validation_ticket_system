@@ -43,9 +43,19 @@ class BoletasService {
         },
       );
       // Suponiendo que el endpoint devuelve: { "ventas": [...] }
+      print('Headers: ${_dio.options.headers}');
       final data = response.data as Map<String, dynamic>;
       final List<dynamic> ventas = data['ventas'] ?? [];
+      print('Respuesta exitosa: ${response.statusCode}');
+      print('Datos: ${response.data}');
       return ventas;
+    } on DioException catch (e) { // <-- Captura específicamente DioException
+      print('Error en la solicitud:');
+      print('URL: ${e.requestOptions.uri}'); // Ahora sí funciona
+      print('Código de estado: ${e.response?.statusCode}');
+      print('Respuesta del servidor: ${e.response?.data}');
+      throw Exception('Failed to load today in-process boletas (Peru): ${e.message}');
+
     } catch (e) {
       throw Exception('Failed to load today in-process boletas (Peru): $e');
     }
